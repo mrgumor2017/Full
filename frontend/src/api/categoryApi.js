@@ -1,6 +1,7 @@
 const BASE_URL = "http://127.0.0.1:8000/api/categories/";
 
-export const fetchCategories = () => fetch(BASE_URL).then(res => res.json());
+export const fetchCategories = (page = 1) =>
+  fetch(`${BASE_URL}?page=${page}`).then((res) => res.json());
 
 export const createCategory = (data) =>
   fetch(BASE_URL, {

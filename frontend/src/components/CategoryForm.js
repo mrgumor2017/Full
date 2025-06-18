@@ -1,73 +1,79 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Spinner, Alert, Button, Form } from 'react-bootstrap';
+import React, { useEffect } from 'react';
+import { Form, Input, Button, message } from 'antd';
 
-export default function CategoryForm({ onSuccess, selectedCategory }) {
-  const [formData, setFormData] = useState({ name: '', description: '' });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+const CategoryForm = ({
+  selectedCategory,
+  clearSelection,
+  onCreate,
+  onUpdate,
+  fetchCategories,
+}) => {
+  const [form] = Form.useForm();
 
   useEffect(() => {
     if (selectedCategory) {
-      setFormData({
-        name: selectedCategory.name,
-        description: selectedCategory.description,
-      });
+      form.setFieldsValue(selectedCategory);
+    } else {
+      form.resetFields();
     }
-  }, [selectedCategory]);
+  }, [selectedCategory, form]);
 
-  const handleChange = e => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
-  const handleSubmit = async e => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
+  const onFinish = async (values) => {
     try {
       if (selectedCategory) {
-        await axios.put(`http://localhost:8000/api/categories/${selectedCategory.id}/`, formData);
+        await onUpdate(selectedCategory.id, values);
+        message.success('Категорію оновлено');
       } else {
-        await axios.post('http://localhost:8000/api/categories/', formData);
+        await onCreate(values);
+        message.success('Категорію створено');
       }
-      onSuccess();
-      setFormData({ name: '', description: '' });
-    } catch (err) {
-      setError('Помилка при збереженні. Перевірте дані.');
-    } finally {
-      setLoading(false);
+      form.resetFields();
+      clearSelection();
+      fetchCategories();
+    } catch (error) {
+      message.error('Помилка при збереженні');
     }
   };
 
   return (
-    <Form onSubmit={handleSubmit}>
-      {error && <Alert variant="danger">{error}</Alert>}
-
-      <Form.Group className="mb-3">
-        <Form.Label>Назва</Form.Label>
-        <Form.Control
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-        />
-      </Form.Group>
-
-      <Form.Group className="mb-3">
-        <Form.Label>Опис</Form.Label>
-        <Form.Control
-          as="textarea"
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-        />
-      </Form.Group>
-
-      <Button type="submit" variant="primary" disabled={loading}>
-        {loading ? <Spinner size="sm" animation="border" /> : selectedCategory ? 'Оновити' : 'Додати'}
-      </Button>
+    <Form
+      form={form}
+      layout="vertical"
+      onFinish={onFinish}
+      style={{ maxWidth: 500, margin: '20px auto' }}
+    >
+      <Form.Item
+        name="name"
+        label="Назва"
+        rules={[{ required: true, message: 'Введіть назву' }]}
+      >
+        <Input />
+      </Form.Item>
+      <Form.Item
+        name="description"
+        label="Опис"
+        rules={[{ required: true, message: 'Введіть опис' }]}
+      >
+        <Input.TextArea rows={3} />
+      </Form.Item>
+      <Form.Item>
+        <Button type="primary" htmlType="submit">
+          {selectedCategory ? 'Оновити' : 'Додати'}
+        </Button>
+        {selectedCategory && (
+          <Button
+            style={{ marginLeft: 10 }}
+            onClick={() => {
+              form.resetFields();
+              clearSelection();
+            }}
+          >
+            Скасувати
+          </Button>
+        )}
+      </Form.Item>
     </Form>
   );
-}
+};
+
+export default CategoryForm;
