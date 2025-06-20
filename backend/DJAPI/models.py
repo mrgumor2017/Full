@@ -7,8 +7,7 @@ class Category(models.Model):
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-
+    image = models.ImageField(upload_to='category_images/', null=True, blank=True)
 
     class Meta:
         verbose_name = 'Category'

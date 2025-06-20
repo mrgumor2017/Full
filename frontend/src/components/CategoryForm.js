@@ -1,37 +1,49 @@
 import React, { useEffect } from 'react';
-import { Form, Input, Button, message } from 'antd';
+import { Form, Input, Button, Upload, message } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
 
 const CategoryForm = ({
   selectedCategory,
   clearSelection,
-  onCreate,
-  onUpdate,
-  fetchCategories,
+  createCategory,
+  updateCategory,
+  refetchCategories,
 }) => {
   const [form] = Form.useForm();
 
   useEffect(() => {
     if (selectedCategory) {
-      form.setFieldsValue(selectedCategory);
+      form.setFieldsValue({
+        name: selectedCategory.name,
+        description: selectedCategory.description,
+        image: [],
+      });
     } else {
       form.resetFields();
     }
   }, [selectedCategory, form]);
 
   const onFinish = async (values) => {
+    const formData = new FormData();
+    formData.append('name', values.name);
+    formData.append('description', values.description);
+    if (values.image && values.image[0]) {
+      formData.append('image', values.image[0].originFileObj);
+    }
+
     try {
       if (selectedCategory) {
-        await onUpdate(selectedCategory.id, values);
+        await updateCategory({ id: selectedCategory.id, formData }).unwrap();
         message.success('Категорію оновлено');
       } else {
-        await onCreate(values);
+        await createCategory(formData).unwrap();
         message.success('Категорію створено');
       }
       form.resetFields();
+      refetchCategories();
       clearSelection();
-      fetchCategories();
     } catch (error) {
-      message.error('Помилка при збереженні');
+      message.error('Помилка при збереженні категорії');
     }
   };
 
@@ -45,10 +57,11 @@ const CategoryForm = ({
       <Form.Item
         name="name"
         label="Назва"
-        rules={[{ required: true, message: 'Введіть назву' }]}
+        rules={[{ required: true, message: 'Введіть назву категорії' }]}
       >
         <Input />
       </Form.Item>
+
       <Form.Item
         name="description"
         label="Опис"
@@ -56,18 +69,24 @@ const CategoryForm = ({
       >
         <Input.TextArea rows={3} />
       </Form.Item>
+
+      <Form.Item
+        name="image"
+        label="Зображення"
+        valuePropName="fileList"
+        getValueFromEvent={(e) => (Array.isArray(e) ? e : e?.fileList)}
+      >
+        <Upload beforeUpload={() => false} listType="picture">
+          <Button icon={<UploadOutlined />}>Завантажити зображення</Button>
+        </Upload>
+      </Form.Item>
+
       <Form.Item>
         <Button type="primary" htmlType="submit">
           {selectedCategory ? 'Оновити' : 'Додати'}
         </Button>
         {selectedCategory && (
-          <Button
-            style={{ marginLeft: 10 }}
-            onClick={() => {
-              form.resetFields();
-              clearSelection();
-            }}
-          >
+          <Button onClick={clearSelection} style={{ marginLeft: 8 }}>
             Скасувати
           </Button>
         )}

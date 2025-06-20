@@ -1,21 +1,43 @@
-const BASE_URL = "http://127.0.0.1:8000/api/categories/";
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-export const fetchCategories = (page = 1) =>
-  fetch(`${BASE_URL}?page=${page}`).then((res) => res.json());
+export const categoryApi = createApi({
+  reducerPath: 'categoryApi',
+  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8000/api/' }),
+  tagTypes: ['Category'],
+  endpoints: (builder) => ({
+    getCategories: builder.query({
+      query: (page = 1) => `categories/?page=${page}`,
+      providesTags: ['Category'],
+    }),
+    createCategory: builder.mutation({
+      query: (data) => ({
+        url: 'categories/',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Category'],
+    }),
+    updateCategory: builder.mutation({
+      query: ({ id, formData }) => ({
+        url: `categories/${id}/`,
+        method: 'PUT',
+        body: formData,
+      }),
+      invalidatesTags: ['Category'],
+    }),
+    deleteCategory: builder.mutation({
+      query: (id) => ({
+        url: `categories/${id}/`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Category'],
+    }),
+  }),
+});
 
-export const createCategory = (data) =>
-  fetch(BASE_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-
-export const updateCategory = (id, data) =>
-  fetch(`${BASE_URL}${id}/`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-
-export const deleteCategory = (id) =>
-  fetch(`${BASE_URL}${id}/`, { method: "DELETE" });
+export const {
+  useGetCategoriesQuery,
+  useCreateCategoryMutation,
+  useUpdateCategoryMutation,
+  useDeleteCategoryMutation,
+} = categoryApi;
