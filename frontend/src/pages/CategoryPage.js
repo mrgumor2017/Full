@@ -7,8 +7,13 @@ import {
   useUpdateCategoryMutation,
   useDeleteCategoryMutation,
 } from '../api/categoryApi';
+import { useSelector } from 'react-redux';
 
 const CategoryPage = () => {
+  const token = useSelector((state) => state.auth.token);
+  if (!token) {
+    return <Navigate to="/login" />;
+  }
   const [editingCategory, setEditingCategory] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
 
