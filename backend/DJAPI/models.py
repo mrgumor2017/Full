@@ -1,5 +1,10 @@
 from django.db import models
 from django.utils.text import slugify
+from django.contrib.auth.models import AbstractUser
+
+class CustomUser(AbstractUser):
+    phone = models.CharField(max_length=20, blank=True)
+    photo = models.ImageField(upload_to='user_photos/', blank=True, null=True)
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -28,5 +33,3 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
-
-# Create your models here.

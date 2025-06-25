@@ -1,39 +1,37 @@
 from rest_framework import serializers
-from .models import Category
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import get_user_model
+from django.db.models import Q
+from .models import Category
 
 User = get_user_model()
+# СЕРІАЛІЗАТОР ДЛЯ РЕЄСТРАЦІЇ
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password']
-
-    def validate_username(self, value):
-        if User.objects.filter(username=value).exists():
-            raise serializers.ValidationError("Цей логін уже зайнятий.")
-        return value
+        fields = ['username', 'email', 'password', 'phone', 'photo']
 
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("Цей email уже використовується.")
+            raise serializers.ValidationError("Користувач з таким email вже існує.")
+        return value
+
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("Користувач з таким іменем вже існує.")
         return value
 
     def create(self, validated_data):
-        user = User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            password=validated_data['password']
-        )
+        user = User.objects.create_user(**validated_data)
         return user
 
-from django.db.models import Q
 
+#СЕРІАЛІЗАТОР ДЛЯ JWT З ВХОДОМ ЧЕРЕЗ EMAIL АБО USERNAME
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
-        identifier = attrs.get("username")  # може бути username або email
+        identifier = attrs.get("username")  # username або email
         password = attrs.get("password")
 
         try:
@@ -44,15 +42,34 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         if not user.check_password(password):
             raise serializers.ValidationError("Невірний пароль")
 
+        # Проксування до стандартної перевірки
         data = super().validate({
             "username": user.username,
             "password": password
         })
+
+        # Додаємо користувача
+        data['user'] = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'phone': user.phone,
+            'photo': user.photo.url if user.photo else None
+        }
+
         return data
 
 
+#СЕРІАЛІЗАТОР ДЛЯ КАТЕГОРІЙ
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = '__all__'
-        read_only_fields = ['id','slug', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'slug', 'created_at', 'updated_at']
+
+
+#СЕРІАЛІЗАТОР ДЛЯ КОРИСТУВАЧА
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'phone', 'photo']

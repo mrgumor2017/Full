@@ -7,19 +7,20 @@ export const authApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: BASE_URL,
     prepareHeaders: (headers, { getState }) => {
-      const token = getState().auth.access;  // Використовуємо 'access' замість 'token'
+      const token = getState().auth.access;  // Використовуємо 'access'
       if (token) {
         headers.set('Authorization', `Bearer ${token}`);
       }
       return headers;
     },
   }),
+  tagTypes: ['User'],  // Додаємо тег для інвалідування кешу
   endpoints: (builder) => ({
     register: builder.mutation({
-      query: (user) => ({
-        url: 'auth/register/',
+      query: (formData) => ({
+        url: '/auth/register/',
         method: 'POST',
-        body: user,
+        body: formData,
       }),
     }),
     login: builder.mutation({
@@ -30,14 +31,23 @@ export const authApi = createApi({
       }),
     }),
     fetchUser: builder.query({
-      query: () => 'auth/user/',  // Перевірте цей маршрут
+      query: () => 'auth/user/',  // Твій маршрут для отримання поточного користувача
+      providesTags: ['User'],  // Позначаємо, що цей запит дає тег 'User'
+    }),
+    updateUser: builder.mutation({
+      query: (formData) => ({
+        url: 'auth/user/',    // той самий маршрут, що і fetchUser
+        method: 'PUT',        // або 'PATCH', залежно від бекенду
+        body: formData,
+      }),
+      invalidatesTags: ['User'],  // Після оновлення користувача — інвалідовуємо кеш, щоб fetchUser оновився
     }),
   }),
 });
-
 
 export const {
   useRegisterMutation,
   useLoginMutation,
   useFetchUserQuery,
+  useUpdateUserMutation,  // експортуємо хук для оновлення користувача
 } = authApi;

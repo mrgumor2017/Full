@@ -2,34 +2,48 @@ import React from 'react';
 import { Form, Input, Button, message, Card } from 'antd';
 import { useRegisterMutation } from '../api/authApi';
 import { useNavigate } from 'react-router-dom';
-
+import { Upload } from 'antd';
 const RegisterPage = () => {
   const [register, { isLoading }] = useRegisterMutation();
   const navigate = useNavigate();
   const [form] = Form.useForm();
 
   const onFinish = async (values) => {
-    const result = await register(values);
+    const formData = new FormData();
 
-    if (result.error) {
-      const errors = result.error.data;
+    formData.append('username', values.username);
+    formData.append('email', values.email);
+    formData.append('phone', values.phone || '');
+    formData.append('password', values.password);
 
-      if (typeof errors === 'object') {
-        Object.entries(errors).forEach(([field, messages]) => {
-          if (Array.isArray(messages)) {
-            messages.forEach((msg) =>
-              message.error(`${field}: ${msg}`)
-            );
-          } else {
-            message.error(`${field}: ${messages}`);
-          }
-        });
+    if (values.photo && values.photo[0]) {
+      formData.append('photo', values.photo[0].originFileObj);
+    }
+
+    try {
+      const result = await register(formData);
+      if (result.error) {
+        const errors = result.error.data;
+
+        if (typeof errors === 'object') {
+          Object.entries(errors).forEach(([field, messages]) => {
+            if (Array.isArray(messages)) {
+              messages.forEach((msg) =>
+                message.error(`${field}: ${msg}`)
+              );
+            } else {
+              message.error(`${field}: ${messages}`);
+            }
+          });
+        } else {
+          message.error('Помилка при реєстрації');
+        }
       } else {
-        message.error('Помилка при реєстрації');
+        message.success('Реєстрація успішна');
+        navigate('/login');
       }
-    } else {
-      message.success('Реєстрація успішна');
-      navigate('/login');
+    } catch (error) {
+      message.error('Помилка при відправці форми');
     }
   };
 
@@ -52,6 +66,15 @@ const RegisterPage = () => {
           ]}
         >
           <Input />
+        </Form.Item>
+                <Form.Item name="phone" label="Телефон">
+          <Input />
+        </Form.Item>
+
+        <Form.Item name="photo" label="Фото" valuePropName="fileList" getValueFromEvent={e => e?.fileList}>
+          <Upload beforeUpload={() => false} listType="picture">
+            <Button>Завантажити фото</Button>
+          </Upload>
         </Form.Item>
         <Form.Item
           name="password"
