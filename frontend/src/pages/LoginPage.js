@@ -4,6 +4,7 @@ import { useLoginMutation } from '../api/authApi';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { setCredentials } from '../features/authSlice';
+import GoogleLoginButton from '../components/GoogleLoginButton';
 
 const LoginPage = () => {
   const [login, { isLoading }] = useLoginMutation();
@@ -47,6 +48,10 @@ const LoginPage = () => {
           </Button>
         </Form.Item>
       </Form>
+      <div style={{ textAlign: 'center', marginTop: 20 }}>
+      <p>або</p>
+      <GoogleLoginButton />
+    </div>
     </Card>
   );
 };

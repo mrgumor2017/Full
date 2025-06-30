@@ -7,11 +7,67 @@ from .serializers import (
     UserSerializer,
 )
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from django.contrib.auth import get_user_model
 from rest_framework import generics
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
+
+import logging
+logger = logging.getLogger(__name__)
+
+class GoogleLoginView(APIView):
+    permission_classes = [AllowAny]
+    def dispatch(self, request, *args, **kwargs):
+        logger.warning(f"🚨 GoogleLoginView.dispatch triggered! Method = {request.method}")
+        return super().dispatch(request, *args, **kwargs)
+    def post(self, request):
+        logger.debug("🔥 GoogleLoginView called")
+        token = request.data.get("id_token")
+        logger.debug(f"📥 Received token: {token}")
+
+        if not token:
+            logger.warning("🚫 No token provided")
+            return Response({"error": "No token provided"}, status=400)
+
+        try:
+            idinfo = id_token.verify_oauth2_token(
+                token,
+                google_requests.Request(),
+                "735629438683-hu9s33dcfkokmutc8e9fnjvubl9rtkf6.apps.googleusercontent.com"
+            )
+            logger.info("✅ Token verified")
+            logger.debug(f"idinfo: {idinfo}")
+        except ValueError as e:
+            logger.error("❌ Token verification failed", exc_info=True)
+            return Response({"error": "Invalid token", "details": str(e)}, status=401)
+
+
+        email = idinfo.get("email")
+        if not email:
+            return Response({"error": "Email not found in token"}, status=400)
+
+        user, created = User.objects.get_or_create(email=email, defaults={
+            "username": email.split("@")[0],
+        })
+
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "username": user.username,
+            }
+        })
+
+
 
 
 #JWT login через username або email

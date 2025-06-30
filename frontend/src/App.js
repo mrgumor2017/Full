@@ -4,6 +4,7 @@ import { Layout, Menu, Button, message } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFetchUserQuery } from './api/authApi';
 import { logout, setCredentials } from './features/authSlice';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 import HomePage from './pages/HomePage';
 import CategoryPage from './pages/CategoryPage';
@@ -113,9 +114,11 @@ function AppLayout() {
 
 function App() {
   return (
-    <Router>
-      <AppLayout />
-    </Router>
+    <GoogleOAuthProvider clientId="735629438683-hu9s33dcfkokmutc8e9fnjvubl9rtkf6.apps.googleusercontent.com">
+      <Router>
+        <AppLayout />
+      </Router>
+    </GoogleOAuthProvider>
   );
 }
 
