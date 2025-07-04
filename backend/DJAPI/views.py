@@ -15,6 +15,24 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
+from dj_rest_auth.views import PasswordResetView
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+import six
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
+
+class CustomPasswordResetTokenGenerator(PasswordResetTokenGenerator):
+    def _make_hash_value(self, user, timestamp):
+        return six.text_type(user.pk) + six.text_type(timestamp) + six.text_type(user.is_active)
+
+custom_token_generator = CustomPasswordResetTokenGenerator()
+
+@method_decorator(csrf_exempt, name='dispatch')
+class CsrfExemptPasswordResetView(PasswordResetView):
+    pass
 
 User = get_user_model()
 
@@ -98,3 +116,4 @@ class CurrentUserView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+

@@ -2,9 +2,9 @@ import React from 'react';
 import { Form, Input, Button, message, Card } from 'antd';
 import { useLoginMutation } from '../api/authApi';
 import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import { setCredentials } from '../features/authSlice';
 import GoogleLoginButton from '../components/GoogleLoginButton';
+import { Link, useNavigate } from 'react-router-dom';
 
 const LoginPage = () => {
   const [login, { isLoading }] = useLoginMutation();
@@ -48,6 +48,9 @@ const LoginPage = () => {
           </Button>
         </Form.Item>
       </Form>
+        <p>
+          <Link to="/forgot-password">Забули пароль?</Link>
+        </p>
       <div style={{ textAlign: 'center', marginTop: 20 }}>
       <p>або</p>
       <GoogleLoginButton />

@@ -7,9 +7,12 @@ from .views import (
     CurrentUserView,
     GoogleLoginView
 )
+from .views import CsrfExemptPasswordResetView
 from rest_framework_simplejwt.views import TokenRefreshView
+from django.contrib.auth import views as auth_views
+from .views import custom_token_generator
 
-app_name = 'DJAPI'
+#app_name = 'DJAPI'
 
 router = DefaultRouter()
 router.register(r'categories', CategoryViewSet, basename='category')
@@ -21,4 +24,9 @@ urlpatterns = [
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('auth/user/', CurrentUserView.as_view(), name='current_user'),
     path('auth/google/', GoogleLoginView.as_view(), name='google_login'),
+    path('auth/password-reset/', CsrfExemptPasswordResetView.as_view(), name='password_reset'),
+    path('auth/password-reset/done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
+    path('auth/reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(token_generator=custom_token_generator
+), name='password_reset_confirm'),
+    path('auth/reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
 ]

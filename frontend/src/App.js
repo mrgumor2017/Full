@@ -11,6 +11,7 @@ import CategoryPage from './pages/CategoryPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 
 const { Header, Content, Footer } = Layout;
 
@@ -44,57 +45,65 @@ function AppLayout() {
   return (
     <Layout className="layout" style={{ minHeight: '100vh' }}>
       <Header>
-        <Menu theme="dark" mode="horizontal" selectable={false}>
-          <Menu.Item key="home">
-            <Link to="/">Головна</Link>
-          </Menu.Item>
-          <Menu.Item key="categories">
-            <Link to="/categories">Категорії</Link>
-          </Menu.Item>
+        <Menu
+          theme="dark"
+          mode="horizontal"
+          selectable={false}
+          items={[
+            {
+              key: 'home',
+              label: <Link to="/">Головна</Link>,
+            },
+            {
+              key: 'categories',
+              label: <Link to="/categories">Категорії</Link>,
+            },
+            ...(user ? [
+              {
+                key: 'user',
+                label: (
+                  <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'white' }}>
+                    <img
+                      src={user.photo}
+                      alt="avatar"
+                      style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        border: '2px solid white',
+                        flexShrink: 0,
+                      }}
+                    />
+                    <span>{user.username || user.email}</span>
+                  </Link>
+                ),
+              },
+              {
+                key: 'profile',
+                label: <Link to="/profile">Профіль</Link>,
+              },
+              {
+                key: 'logout',
+                label: (
+                  <Button type="link" onClick={handleLogout} style={{ color: 'white' }}>
+                    Вийти
+                  </Button>
+                ),
+              },
+            ] : [
+              {
+                key: 'login',
+                label: <Link to="/login">Увійти</Link>,
+              },
+              {
+                key: 'register',
+                label: <Link to="/register">Реєстрація</Link>,
+              },
+            ])
+          ]}
+        />
 
-          <Menu.Item key="spacer" style={{ flex: 1, pointerEvents: 'none' }} />
-
-          {user ? (
-            <>
-              <Menu.Item key="user" style={{ cursor: 'default' }}>
-                <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'white' }}>
-                  <img
-                    src={user.photo}
-                    alt="avatar"
-                    style={{
-                      width: '32px',
-                      height: '32px',
-                      borderRadius: '50%',
-                      objectFit: 'cover',
-                      border: '2px solid white',
-                      flexShrink: 0,
-                    }}
-                  />
-                  <span style={{ whiteSpace: 'nowrap' }}>
-                    {user.username || user.email}
-                  </span>
-                </Link>
-              </Menu.Item>
-              <Menu.Item key="profile">
-                <Link to="/profile">Профіль</Link>
-              </Menu.Item>
-              <Menu.Item key="logout">
-                <Button type="link" onClick={handleLogout} style={{ color: 'white' }}>
-                  Вийти
-                </Button>
-              </Menu.Item>
-            </>
-          ) : (
-            <>
-              <Menu.Item key="login">
-                <Link to="/login">Увійти</Link>
-              </Menu.Item>
-              <Menu.Item key="register">
-                <Link to="/register">Реєстрація</Link>
-              </Menu.Item>
-            </>
-          )}
-        </Menu>
       </Header>
 
       <Content style={{ padding: '24px' }}>
@@ -104,6 +113,7 @@ function AppLayout() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/profile" element={<PrivateRoute element={<ProfilePage />} />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         </Routes>
       </Content>
 
