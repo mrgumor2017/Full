@@ -11,6 +11,7 @@ from .views import CsrfExemptPasswordResetView
 from rest_framework_simplejwt.views import TokenRefreshView
 from django.contrib.auth import views as auth_views
 from .views import custom_token_generator
+from . import views
 
 #app_name = 'DJAPI'
 
@@ -19,6 +20,7 @@ router.register(r'categories', CategoryViewSet, basename='category')
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('category/<slug:category_slug>/', views.products_by_category, name='products_by_category'),
     path('auth/register/', RegisterView.as_view(), name='register'),
     path('auth/login/', CustomTokenObtainPairView.as_view(), name='custom_token_obtain_pair'),
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

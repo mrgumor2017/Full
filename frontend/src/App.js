@@ -45,23 +45,26 @@ function AppLayout() {
   return (
     <Layout className="layout" style={{ minHeight: '100vh' }}>
       <Header>
-        <Menu
-          theme="dark"
-          mode="horizontal"
-          selectable={false}
-          items={[
-            {
-              key: 'home',
-              label: <Link to="/">Головна</Link>,
-            },
-            {
-              key: 'categories',
-              label: <Link to="/categories">Категорії</Link>,
-            },
-            ...(user ? [
-              {
-                key: 'user',
-                label: (
+          <Menu
+            theme="dark"
+            mode="horizontal"
+            selectable={false}
+            style={{ display: 'flex', justifyContent: 'space-between' }} // Вирівнювання меню
+          >
+            {/* Ліва частина меню */}
+            <div style={{ display: 'flex', gap: '16px' }}>
+              <Menu.Item key="home">
+                <Link to="/">Головна</Link>
+              </Menu.Item>
+              <Menu.Item key="categories">
+                <Link to="/categories">Категорії</Link>
+              </Menu.Item>
+            </div>
+
+            {/* Права частина меню */}
+            <div>
+              {user ? (
+                <Menu.Item key="user">
                   <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'white' }}>
                     <img
                       src={user.photo}
@@ -77,34 +80,27 @@ function AppLayout() {
                     />
                     <span>{user.username || user.email}</span>
                   </Link>
-                ),
-              },
-              {
-                key: 'profile',
-                label: <Link to="/profile">Профіль</Link>,
-              },
-              {
-                key: 'logout',
-                label: (
+                </Menu.Item>
+              ) : (
+                <>
+                  <Menu.Item key="login">
+                    <Link to="/login">Увійти</Link>
+                  </Menu.Item>
+                  <Menu.Item key="register">
+                    <Link to="/register">Реєстрація</Link>
+                  </Menu.Item>
+                </>
+              )}
+              {user && (
+                <Menu.Item key="logout">
                   <Button type="link" onClick={handleLogout} style={{ color: 'white' }}>
                     Вийти
                   </Button>
-                ),
-              },
-            ] : [
-              {
-                key: 'login',
-                label: <Link to="/login">Увійти</Link>,
-              },
-              {
-                key: 'register',
-                label: <Link to="/register">Реєстрація</Link>,
-              },
-            ])
-          ]}
-        />
-
-      </Header>
+                </Menu.Item>
+              )}
+            </div>
+          </Menu>
+        </Header>
 
       <Content style={{ padding: '24px' }}>
         <Routes>

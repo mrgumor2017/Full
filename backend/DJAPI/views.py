@@ -20,9 +20,8 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 import six
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_encode
+from django.shortcuts import render, get_object_or_404
+
 
 class CustomPasswordResetTokenGenerator(PasswordResetTokenGenerator):
     def _make_hash_value(self, user, timestamp):
@@ -117,3 +116,7 @@ class CurrentUserView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user
 
+def products_by_category(request, category_slug):
+    category = get_object_or_404(Category, slug=category_slug)
+    products = category.products.all()  # Отримання всіх продуктів, пов’язаних з категорією
+    return render(request, 'products_by_category.html', {'category': category, 'products': products})
