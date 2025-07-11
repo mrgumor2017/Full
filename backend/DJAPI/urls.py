@@ -12,11 +12,13 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from django.contrib.auth import views as auth_views
 from .views import custom_token_generator
 from . import views
+from .views import ProductViewSet
 
 #app_name = 'DJAPI'
 
 router = DefaultRouter()
 router.register(r'categories', CategoryViewSet, basename='category')
+router.register(r'products', ProductViewSet, basename='product')
 
 urlpatterns = [
     path('', include(router.urls)),

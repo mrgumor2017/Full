@@ -12,6 +12,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ProductPage from './pages/ProductPage';
 
 const { Header, Content, Footer } = Layout;
 
@@ -59,6 +60,10 @@ function AppLayout() {
               <Menu.Item key="categories">
                 <Link to="/categories">Категорії</Link>
               </Menu.Item>
+              <Menu.Item key="products">
+                <Link to="/products">Продукти</Link>
+              </Menu.Item>
+
             </div>
 
             {/* Права частина меню */}
@@ -106,6 +111,7 @@ function AppLayout() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/categories" element={<PrivateRoute element={<CategoryPage />} />} />
+          <Route path="/products" element={<PrivateRoute element={<ProductPage />} />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/profile" element={<PrivateRoute element={<ProfilePage />} />} />

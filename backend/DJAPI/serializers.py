@@ -3,6 +3,8 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from .models import Category
+from .models import Product
+
 
 User = get_user_model()
 # СЕРІАЛІЗАТОР ДЛЯ РЕЄСТРАЦІЇ
@@ -73,3 +75,11 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'phone', 'photo']
+
+class ProductSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)  # Додаємо повний серіалізатор для категорії
+
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'description', 'price', 'category', 'created_at', 'updated_at']
+
